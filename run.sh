@@ -27,7 +27,16 @@ else
     exit 1
 fi
 
-# ─── 3) التحقق من cloudflared ───
+# ─── 3) تثبيت المكتبات ───
+if [ -f "requirements.txt" ]; then
+    echo -e "${BLUE}📦 جاري التحقق من المكتبات وتثبيتها...${NC}"
+    pip install -r requirements.txt --quiet
+    echo -e "${GREEN}✅ المكتبات جاهزة.${NC}"
+else
+    echo -e "${YELLOW}⚠️ لم أجد ملف requirements.txt، سيتم تخطي التثبيت.${NC}"
+fi
+
+# ─── 4) التحقق من cloudflared ───
 if [ -x "./cloudflared" ]; then
     CF="./cloudflared"
 elif command -v cloudflared >/dev/null 2>&1; then
@@ -41,7 +50,7 @@ else
     exit 1
 fi
 
-# ─── 4) الإعدادات ───
+# ─── 5) الإعدادات ───
 export PORT=${PORT:-7860}
 export HOST="0.0.0.0"
 export TUNNEL=""    # النفق يديره run.sh
@@ -55,7 +64,7 @@ echo -e "  🚇 النفق  : ${YELLOW}Cloudflare${NC}"
 echo -e "${GREEN}════════════════════════════════════════════${NC}"
 echo ""
 
-# ─── 5) تشغيل app.py في الخلفية ───
+# ─── 6) تشغيل app.py في الخلفية ───
 echo -e "${BLUE}🚀 بدء تشغيل الموقع...${NC}"
 python app.py &
 APP_PID=$!
@@ -66,7 +75,7 @@ if ! kill -0 $APP_PID 2>/dev/null; then
     exit 1
 fi
 
-# ─── 6) تنظيف عند الإيقاف ───
+# ─── 7) تنظيف عند الإيقاف ───
 cleanup() {
     echo ""
     echo -e "${YELLOW}⏹️  إيقاف الموقع والنفق...${NC}"
@@ -78,7 +87,7 @@ cleanup() {
 }
 trap cleanup INT TERM
 
-# ─── 7) تشغيل Cloudflare Tunnel ───
+# ─── 8) تشغيل Cloudflare Tunnel ───
 echo ""
 echo -e "${BLUE}🌍 جاري إنشاء الرابط العام...${NC}"
 echo -e "${YELLOW}(انتظر 5-10 ثوانٍ — سيظهر الرابط في صندوق أدناه)${NC}"
